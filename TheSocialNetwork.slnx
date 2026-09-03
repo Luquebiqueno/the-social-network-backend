@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TheSocialNetwork.Api/TheSocialNetwork.Api.csproj" />
+    <Project Path="src/TheSocialNetwork.Application/TheSocialNetwork.Application.csproj" />
+    <Project Path="src/TheSocialNetwork.Domain/TheSocialNetwork.Domain.csproj" />
+    <Project Path="src/TheSocialNetwork.Infra.Persistence/TheSocialNetwork.Infra.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TheSocialNetwork.EndToEndTests/TheSocialNetwork.EndToEndTests.csproj" />
+    <Project Path="tests/TheSocialNetwork.IntegrationTests/TheSocialNetwork.IntegrationTests.csproj" />
+    <Project Path="tests/TheSocialNetwork.UnitTests/TheSocialNetwork.UnitTests.csproj" />
+  </Folder>
+</Solution>

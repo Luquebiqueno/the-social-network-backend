@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../TheSocialNetwork.Domain/TheSocialNetwork.Domain.csproj" />
+    <ProjectReference Include="../TheSocialNetwork.Application/TheSocialNetwork.Application.csproj" />
+    <ProjectReference Include="../TheSocialNetwork.Infra.Persistence/TheSocialNetwork.Infra.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+</Project>
