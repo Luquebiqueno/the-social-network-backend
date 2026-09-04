@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Data/" />
-    <Folder Include="Messaging/" />
     <Folder Include="Repositories/" />
     <Folder Include="Repositories/UserProfiles/" />
   </ItemGroup>
@@ -16,10 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="../TheSocialNetwork.Application/TheSocialNetwork.Application.csproj" />
     <ProjectReference Include="../TheSocialNetwork.Domain/TheSocialNetwork.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <InternalsVisibleTo Include="TheSocialNetwork.UnitTests" />
   </ItemGroup>
 
   <ItemGroup>

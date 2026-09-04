@@ -16,12 +16,12 @@ internal sealed class ChangeVisibility : IEndpoint
         app.MapPut("user-profiles/{userProfileId:guid}/visibility", async (
             Guid userProfileId,
             Request request,
-            ISender sender,
+            ICommandHandler<ChangeUserProfileVisibilityCommand, Result> handler,
             CancellationToken cancellationToken) =>
         {
             var command = new ChangeUserProfileVisibilityCommand(userProfileId, (ProfileVisibility)request.Visibility);
 
-            Result result = await sender.SendAsync<ChangeUserProfileVisibilityCommand, Result>(command, cancellationToken);
+            Result result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

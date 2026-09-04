@@ -14,12 +14,12 @@ internal sealed class Create : IEndpoint
     {
         app.MapPost("user-profiles", async (
             Request request,
-            ISender sender,
+            ICommandHandler<CreateUserProfileCommand, Result<Guid>> handler,
             CancellationToken cancellationToken) =>
         {
             var command = new CreateUserProfileCommand(request.UserId, request.Username, request.DisplayName);
 
-            Result<Guid> result = await sender.SendAsync<CreateUserProfileCommand, Result<Guid>>(command, cancellationToken);
+            Result<Guid> result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(
                 id => Results.Created($"user-profiles/{id}", id),

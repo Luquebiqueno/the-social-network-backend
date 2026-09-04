@@ -15,13 +15,13 @@ internal sealed class Update : IEndpoint
         app.MapPut("user-profiles/{userProfileId:guid}", async (
             Guid userProfileId,
             Request request,
-            ISender sender,
+            ICommandHandler<UpdateUserProfileCommand, Result> handler,
             CancellationToken cancellationToken) =>
         {
             var command = new UpdateUserProfileCommand(
                 userProfileId, request.DisplayName, request.Biography, request.AvatarUrl);
 
-            Result result = await sender.SendAsync<UpdateUserProfileCommand, Result>(command, cancellationToken);
+            Result result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

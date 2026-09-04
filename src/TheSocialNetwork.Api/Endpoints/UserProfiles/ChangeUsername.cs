@@ -15,12 +15,12 @@ internal sealed class ChangeUsername : IEndpoint
         app.MapPut("user-profiles/{userProfileId:guid}/username", async (
             Guid userProfileId,
             Request request,
-            ISender sender,
+            ICommandHandler<ChangeUsernameCommand, Result> handler,
             CancellationToken cancellationToken) =>
         {
             var command = new ChangeUsernameCommand(userProfileId, request.NewUsername);
 
-            Result result = await sender.SendAsync<ChangeUsernameCommand, Result>(command, cancellationToken);
+            Result result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

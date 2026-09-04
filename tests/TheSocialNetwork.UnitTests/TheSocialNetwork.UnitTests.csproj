@@ -22,7 +22,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\TheSocialNetwork.Domain\TheSocialNetwork.Domain.csproj" />
     <ProjectReference Include="..\..\src\TheSocialNetwork.Application\TheSocialNetwork.Application.csproj" />
-    <ProjectReference Include="..\..\src\TheSocialNetwork.Infra.Persistence\TheSocialNetwork.Infra.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
