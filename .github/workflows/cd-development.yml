@@ -1,0 +1,120 @@
+name: API CD - Development
+
+on:
+  workflow_run:
+    workflows: ["API CI"]
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: api-development-deployment
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: backend
+  CONTAINER_NAME: the-social-network-api
+  CONTAINER_PORT: "8080"
+  HOST_PORT: "80"
+
+jobs:
+  deploy:
+    name: Build, publish and deploy
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: development
+
+    steps:
+      - name: Resolve source revision
+        id: revision
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            echo "sha=$WORKFLOW_RUN_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=$CURRENT_SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout tested revision
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.revision.outputs.sha }}
+
+      - name: Validate deployment configuration
+        env:
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+        run: |
+          test -n "$AWS_ROLE_ARN" || { echo "Missing environment variable: AWS_ROLE_ARN"; exit 1; }
+          test -n "$EC2_INSTANCE_ID" || { echo "Missing environment variable: EC2_INSTANCE_ID"; exit 1; }
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: github-actions-api-development
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push immutable image
+        id: image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.revision.outputs.sha }}
+          DOCKERFILE_PATH: ${{ vars.DOCKERFILE_PATH || 'src/TheSocialNetwork.Api/Dockerfile' }}
+        run: |
+          IMAGE_URI="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build --file "$DOCKERFILE_PATH" --tag "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+          echo "uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy image through Systems Manager
+        id: deploy
+        env:
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+        run: |
+          ECR_REGISTRY="${IMAGE_URI%%/*}"
+          COMMAND_ID="$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "Deploy API revision ${{ steps.revision.outputs.sha }}" \
+            --parameters commands="[
+              \"set -eu\",
+              \"aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY\",
+              \"docker pull $IMAGE_URI\",
+              \"docker rm --force $CONTAINER_NAME 2>/dev/null || true\",
+              \"docker run --detach --name $CONTAINER_NAME --restart unless-stopped --publish $HOST_PORT:$CONTAINER_PORT --env ASPNETCORE_ENVIRONMENT=Development --env ASPNETCORE_URLS=http://+:$CONTAINER_PORT $IMAGE_URI\",
+              \"docker image prune --force\"
+            ]" \
+            --query 'Command.CommandId' \
+            --output text)"
+          echo "command-id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID"
+
+      - name: Show deployment result
+        if: always() && steps.deploy.outputs.command-id != ''
+        env:
+          EC2_INSTANCE_ID: ${{ vars.EC2_INSTANCE_ID }}
+          COMMAND_ID: ${{ steps.deploy.outputs.command-id }}
+        run: |
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID" \
+            --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}'
