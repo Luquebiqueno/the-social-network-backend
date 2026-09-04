@@ -18,7 +18,7 @@ public class UpdateUserProfileCommandHandlerTests(UpdateUserProfileTestFixture f
         var profile = _fixture.GetSeededProfile(_repository);
         var command = _fixture.GetValidCommand(profile.Id);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(command.DisplayName, profile.DisplayName.Value);
@@ -35,7 +35,7 @@ public class UpdateUserProfileCommandHandlerTests(UpdateUserProfileTestFixture f
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = new UpdateUserProfileCommand(Guid.Empty, "", null, null);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(0, _repository.UpdateCallCount);
@@ -49,7 +49,7 @@ public class UpdateUserProfileCommandHandlerTests(UpdateUserProfileTestFixture f
         var command = new UpdateUserProfileCommand(
             _fixture.GetValidUserProfileId(), _fixture.GetValidDisplayName(), null, null);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.NotFound, result.Error);

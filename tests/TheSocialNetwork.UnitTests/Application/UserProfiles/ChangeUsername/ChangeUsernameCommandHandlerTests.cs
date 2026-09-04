@@ -18,7 +18,7 @@ public class ChangeUsernameCommandHandlerTests(ChangeUsernameTestFixture fixture
         var profile = _fixture.GetSeededProfile(_repository);
         var command = _fixture.GetValidCommand(profile.Id);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(command.NewUsername, profile.Username.Value);
@@ -33,7 +33,7 @@ public class ChangeUsernameCommandHandlerTests(ChangeUsernameTestFixture fixture
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = new ChangeUsernameCommand(Guid.Empty, "");
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(0, _repository.UpdateCallCount);
@@ -46,7 +46,7 @@ public class ChangeUsernameCommandHandlerTests(ChangeUsernameTestFixture fixture
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = _fixture.GetValidCommand(_fixture.GetValidUserProfileId());
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.NotFound, result.Error);
@@ -63,7 +63,7 @@ public class ChangeUsernameCommandHandlerTests(ChangeUsernameTestFixture fixture
 
         var command = new ChangeUsernameCommand(profile.Id, otherProfile.Username.Value);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.UsernameAlreadyTaken, result.Error);
@@ -77,7 +77,7 @@ public class ChangeUsernameCommandHandlerTests(ChangeUsernameTestFixture fixture
         var profile = _fixture.GetSeededProfile(_repository);
         var command = new ChangeUsernameCommand(profile.Id, profile.Username.Value);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.UsernameUnchanged, result.Error);

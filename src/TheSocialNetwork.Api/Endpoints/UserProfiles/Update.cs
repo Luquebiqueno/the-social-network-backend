@@ -1,5 +1,6 @@
 using TheSocialNetwork.Api.Extensions;
 using TheSocialNetwork.Api.Infrastructure;
+using TheSocialNetwork.Application.Abstractions.Messaging;
 using TheSocialNetwork.Application.UserProfiles.UpdateUserProfile;
 using TheSocialNetwork.Domain.SeedWork;
 
@@ -14,13 +15,13 @@ internal sealed class Update : IEndpoint
         app.MapPut("user-profiles/{userProfileId:guid}", async (
             Guid userProfileId,
             Request request,
-            UpdateUserProfileCommandHandler handler,
+            ISender sender,
             CancellationToken cancellationToken) =>
         {
             var command = new UpdateUserProfileCommand(
                 userProfileId, request.DisplayName, request.Biography, request.AvatarUrl);
 
-            Result result = await handler.Handle(command, cancellationToken);
+            Result result = await sender.SendAsync<UpdateUserProfileCommand, Result>(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

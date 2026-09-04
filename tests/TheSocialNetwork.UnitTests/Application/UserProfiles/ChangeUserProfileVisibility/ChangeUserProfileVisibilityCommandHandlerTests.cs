@@ -18,7 +18,7 @@ public class ChangeUserProfileVisibilityCommandHandlerTests(ChangeUserProfileVis
         var profile = _fixture.GetSeededProfile(_repository);
         var command = new ChangeUserProfileVisibilityCommand(profile.Id, ProfileVisibility.Private);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(ProfileVisibility.Private, profile.Visibility);
@@ -33,7 +33,7 @@ public class ChangeUserProfileVisibilityCommandHandlerTests(ChangeUserProfileVis
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = new ChangeUserProfileVisibilityCommand(Guid.Empty, (ProfileVisibility)999);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(0, _repository.UpdateCallCount);
@@ -46,7 +46,7 @@ public class ChangeUserProfileVisibilityCommandHandlerTests(ChangeUserProfileVis
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = new ChangeUserProfileVisibilityCommand(_fixture.GetValidUserProfileId(), ProfileVisibility.Private);
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.NotFound, result.Error);

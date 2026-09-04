@@ -1,5 +1,6 @@
 using TheSocialNetwork.Api.Extensions;
 using TheSocialNetwork.Api.Infrastructure;
+using TheSocialNetwork.Application.Abstractions.Messaging;
 using TheSocialNetwork.Application.UserProfiles.CreateUserProfile;
 using TheSocialNetwork.Domain.SeedWork;
 
@@ -13,12 +14,12 @@ internal sealed class Create : IEndpoint
     {
         app.MapPost("user-profiles", async (
             Request request,
-            CreateUserProfileCommandHandler handler,
+            ISender sender,
             CancellationToken cancellationToken) =>
         {
             var command = new CreateUserProfileCommand(request.UserId, request.Username, request.DisplayName);
 
-            Result<Guid> result = await handler.Handle(command, cancellationToken);
+            Result<Guid> result = await sender.SendAsync<CreateUserProfileCommand, Result<Guid>>(command, cancellationToken);
 
             return result.Match(
                 id => Results.Created($"user-profiles/{id}", id),

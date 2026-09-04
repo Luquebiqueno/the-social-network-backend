@@ -17,7 +17,7 @@ public class CreateUserProfileCommandHandlerTests(CreateUserProfileTestFixture f
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = _fixture.GetValidCommand();
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsSuccess);
 
@@ -36,7 +36,7 @@ public class CreateUserProfileCommandHandlerTests(CreateUserProfileTestFixture f
         var handler = _fixture.GetHandler(_repository, _unitOfWork);
         var command = new CreateUserProfileCommand(Guid.Empty, "", "");
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(0, _repository.AddCallCount);
@@ -53,7 +53,7 @@ public class CreateUserProfileCommandHandlerTests(CreateUserProfileTestFixture f
         var command = new CreateUserProfileCommand(
             existingProfile.UserId, _fixture.GetValidUsername(), _fixture.GetValidDisplayName());
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.AlreadyExists, result.Error);
@@ -71,7 +71,7 @@ public class CreateUserProfileCommandHandlerTests(CreateUserProfileTestFixture f
         var command = new CreateUserProfileCommand(
             _fixture.GetValidUserId(), existingProfile.Username.Value, _fixture.GetValidDisplayName());
 
-        var result = await handler.Handle(command);
+        var result = await handler.HandleAsync(command);
 
         Assert.True(result.IsFailure);
         Assert.Equal(UserProfileErrors.UsernameAlreadyTaken, result.Error);

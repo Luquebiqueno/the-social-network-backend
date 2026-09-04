@@ -1,5 +1,6 @@
 using TheSocialNetwork.Api.Extensions;
 using TheSocialNetwork.Api.Infrastructure;
+using TheSocialNetwork.Application.Abstractions.Messaging;
 using TheSocialNetwork.Application.UserProfiles.ChangeUsername;
 using TheSocialNetwork.Domain.SeedWork;
 
@@ -14,12 +15,12 @@ internal sealed class ChangeUsername : IEndpoint
         app.MapPut("user-profiles/{userProfileId:guid}/username", async (
             Guid userProfileId,
             Request request,
-            ChangeUsernameCommandHandler handler,
+            ISender sender,
             CancellationToken cancellationToken) =>
         {
             var command = new ChangeUsernameCommand(userProfileId, request.NewUsername);
 
-            Result result = await handler.Handle(command, cancellationToken);
+            Result result = await sender.SendAsync<ChangeUsernameCommand, Result>(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

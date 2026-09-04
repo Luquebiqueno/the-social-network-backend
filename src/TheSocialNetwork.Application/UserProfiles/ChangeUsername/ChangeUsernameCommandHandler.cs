@@ -1,6 +1,7 @@
 using FluentValidation;
 using TheSocialNetwork.Application.Abstractions;
 using TheSocialNetwork.Application.Abstractions.Data;
+using TheSocialNetwork.Application.Abstractions.Messaging;
 using TheSocialNetwork.Domain.UserProfiles;
 using TheSocialNetwork.Domain.SeedWork;
 
@@ -9,13 +10,13 @@ namespace TheSocialNetwork.Application.UserProfiles.ChangeUsername;
 public sealed class ChangeUsernameCommandHandler(
     IUserProfileRepository repository,
     IUnitOfWork unitOfWork,
-    IValidator<ChangeUsernameCommand> validator)
+    IValidator<ChangeUsernameCommand> validator) : ICommandHandler<ChangeUsernameCommand, Result>
 {
     private readonly IUserProfileRepository _repository = repository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IValidator<ChangeUsernameCommand> _validator = validator;
 
-    public async Task<Result> Handle(
+    public async Task<Result> HandleAsync(
         ChangeUsernameCommand command,
         CancellationToken cancellationToken = default
     )

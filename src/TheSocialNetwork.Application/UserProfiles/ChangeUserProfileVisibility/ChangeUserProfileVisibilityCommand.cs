@@ -1,7 +1,9 @@
+using TheSocialNetwork.Application.Abstractions.Messaging;
+using TheSocialNetwork.Domain.SeedWork;
 using TheSocialNetwork.Domain.UserProfiles;
 
 namespace TheSocialNetwork.Application.UserProfiles.ChangeUserProfileVisibility;
 
 public sealed record ChangeUserProfileVisibilityCommand(
     Guid UserProfileId,
-    ProfileVisibility Visibility);
+    ProfileVisibility Visibility) : ICommand<Result>;

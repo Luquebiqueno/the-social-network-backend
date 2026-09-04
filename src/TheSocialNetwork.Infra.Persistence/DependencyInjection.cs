@@ -3,8 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using TheSocialNetwork.Application.Abstractions.Data;
+using TheSocialNetwork.Application.Abstractions.Messaging;
 using TheSocialNetwork.Domain.UserProfiles;
 using TheSocialNetwork.Infra.Persistence.Data;
+using TheSocialNetwork.Infra.Persistence.Messaging;
 using TheSocialNetwork.Infra.Persistence.Repositories.UserProfiles;
 
 namespace TheSocialNetwork.Infra.Persistence;
@@ -44,8 +46,10 @@ public static class DependencyInjection
             return new NpgsqlDataSourceBuilder(connectionString.ConnectionString).Build();
         });
 
+        services.AddScoped<ISender, Sender>();
         services.AddScoped<IUnitOfWork, DapperUnitOfWork>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+
         return services;
     }
 }

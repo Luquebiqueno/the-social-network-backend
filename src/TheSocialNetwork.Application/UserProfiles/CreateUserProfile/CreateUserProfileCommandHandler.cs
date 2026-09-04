@@ -1,6 +1,7 @@
 using FluentValidation;
 using TheSocialNetwork.Application.Abstractions;
 using TheSocialNetwork.Application.Abstractions.Data;
+using TheSocialNetwork.Application.Abstractions.Messaging;
 using TheSocialNetwork.Domain.UserProfiles;
 using TheSocialNetwork.Domain.SeedWork;
 
@@ -9,13 +10,13 @@ namespace TheSocialNetwork.Application.UserProfiles.CreateUserProfile;
 public sealed class CreateUserProfileCommandHandler(
     IUserProfileRepository repository,
     IUnitOfWork unitOfWork,
-    IValidator<CreateUserProfileCommand> validator)
+    IValidator<CreateUserProfileCommand> validator) : ICommandHandler<CreateUserProfileCommand, Result<Guid>>
 {
     private readonly IUserProfileRepository _repository = repository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IValidator<CreateUserProfileCommand> _validator = validator;
 
-    public async Task<Result<Guid>> Handle(
+    public async Task<Result<Guid>> HandleAsync(
         CreateUserProfileCommand command,
         CancellationToken cancellationToken = default
     )
