@@ -4,6 +4,13 @@ EXPOSE 8080
 
 ENV ASPNETCORE_URLS=http://+:8080
 
+RUN apt-get update \
+    && apt-get install --no-install-recommends --yes curl \
+    && rm -rf /var/lib/apt/lists/*
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl --fail http://localhost:8080/health/ready || exit 1
+
 USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG configuration=Release

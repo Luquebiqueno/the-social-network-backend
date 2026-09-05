@@ -4,8 +4,11 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using TheSocialNetwork.Application.Abstractions.Data;
 using TheSocialNetwork.Domain.UserProfiles;
+using TheSocialNetwork.Domain.Users;
 using TheSocialNetwork.Infra.Persistence.Data;
+using TheSocialNetwork.Infra.Persistence.HealthChecks;
 using TheSocialNetwork.Infra.Persistence.Repositories.UserProfiles;
+using TheSocialNetwork.Infra.Persistence.Repositories.Users;
 
 namespace TheSocialNetwork.Infra.Persistence;
 
@@ -46,6 +49,10 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork, DapperUnitOfWork>();
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        services.AddHealthChecks()
+            .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
         return services;
     }
